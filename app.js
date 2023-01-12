@@ -191,15 +191,84 @@ function chars(input) {
 //////////////////////////////////////////* End Of Starter Code *//////////////////////////////////////////
 // Any additional functions can be written below this line 👇. Happy Coding! 😁
 
+//function findPerson(person, people){
+    //f. finds person by id (spouse)
+    //f. finds people by id (parents)
+    //f. finds people based off parents (siblings)
+    // return collection of people
+//}
 
-function findPersonFamily(person) {
-    let personFamily = `First Name: ${person.firstName}\n`;
-    personFamily += `Last Name: ${person.lastName}\n`;
-    personFamily += `Eye Color: ${person.eyeColor}\n`;
-    personFamily += `Date of Birth: ${person.dob}\n`;
-    personFamily += `Gender: ${person.gender}\n`;
-    personFamily += `Height: ${person.height}\n`;
-    personFamily += `Weight: ${person.weight}\n`;
-    personFamily += `Occupation: ${person.occupation}\n`;
-    return(personFamily);
+
+// TODO #2
+function findPersonFamily(person, people) {
+    let family = `${person.firstName} ${person.lastName}'s family:`;
+
+    
+    // Find the person's spouse
+    let spouse = people.filter(p => p.currentSpouse === person.id);
+    if (spouse.length > 0) {
+        family += `\nCurrent Spouse: ${spouse[0].firstName} ${spouse[0].lastName}`;
+    }
+
+    // Find the person's parents
+    let mother = people.filter(p => p.id === person.parents[0]);
+    let father = people.filter(p => p.id === person.parents[1]);
+    if (mother.length > 0) {
+        family += `\nMother: ${mother[0].firstName} ${mother[0].lastName}`;
+    }
+    
+    if (father.length > 0) {
+        family += `\nFather: ${father[0].firstName} ${father[0].lastName}`;
+    }
+
+    // Find the person's siblings
+    let siblings = people.filter(p => p.parents.includes(person.parents[0]) && p.id !== person.id);
+    if (siblings.length > 0) {
+        family += `\nSiblings:`;
+        for (let sibling of siblings) {
+            family += `\n   ${sibling.firstName} ${sibling.lastName}`;
+        }
+    }
+
+    return family;
+}
+
+// TODO #3
+
+function findPersonDescendants(person, people) {
+    let descendants = `${person.firstName} ${person.lastName}'s descendants:`;
+
+    function getDescendants(person, people, level) {
+        let children = people.filter(p => p.parents.includes(person.id));
+        for (let child of children) {
+            descendants += `\n ${' '.repeat(level * 4)} ${child.firstName} ${child.lastName}`;
+            getDescendants(child, people, level + 1);
+        }
+    }
+
+    getDescendants(person, people, 1);
+    return descendants;
+}
+
+// TODO #4
+
+function searchByTraits(people) {
+    let searchTraits = promptFor("Enter the traits you would like to search by (comma-separated)", chars).split(',');
+    let searchResults = [];
+
+    for (let i = 0; i < people.length; i++) {
+        for (let trait of searchTraits) {
+            if (
+                people[i].gender.toLowerCase() === trait.trim().toLowerCase() ||
+                people[i].eyeColor.toLowerCase() === trait.trim().toLowerCase() ||
+                people[i].height === trait.trim() ||
+                people[i].weight === trait.trim() ||
+                people[i].age === trait.trim()
+            ) {
+                searchResults.push(people[i]);
+                break;
+            }
+        }
+    }
+    return searchResults;
 }
