@@ -216,7 +216,7 @@ function findPersonFamily(person, people) {
     if (mother.length > 0) {
         family += `\nMother: ${mother[0].firstName} ${mother[0].lastName}`;
     }
-    
+
     if (father.length > 0) {
         family += `\nFather: ${father[0].firstName} ${father[0].lastName}`;
     }
@@ -250,25 +250,57 @@ function findPersonDescendants(person, people) {
     return descendants;
 }
 
-// TODO #4
+
+// TODO #4 and 4a
 
 function searchByTraits(people) {
-    let searchTraits = promptFor("Enter the traits you would like to search by (comma-separated)", chars).split(',');
+    function checkTrait(personTrait, searchTrait) {
+        if (personTrait) {
+            return personTrait.toString().toLowerCase() === searchTrait.toLowerCase().trim();
+        }
+        return false;
+    }
+    let searchType = promptFor("Do you know the traits you are looking for? Enter 'yes' or 'no'", yesNo).toLowerCase();
+    let searchTraits;
     let searchResults = [];
+    let matchingOptions = '';
+
+    if (searchType === "yes") {
+        searchTraits = promptFor("Enter the traits you would like to search by (comma-separated)", chars).split(',');
+    } else {
+        searchTraits = [promptFor("Enter the trait you would like to search by", chars).trim()];
+    }
 
     for (let i = 0; i < people.length; i++) {
+        let traitMatchCount = 0;
         for (let trait of searchTraits) {
             if (
-                people[i].gender.toLowerCase() === trait.trim().toLowerCase() ||
-                people[i].eyeColor.toLowerCase() === trait.trim().toLowerCase() ||
-                people[i].height === trait.trim() ||
-                people[i].weight === trait.trim() ||
-                people[i].age === trait.trim()
+                checkTrait(people[i].gender, trait) ||
+                checkTrait(people[i].dob, trait) ||
+                checkTrait(people[i].height, trait) ||
+                checkTrait(people[i].weight, trait) ||
+                checkTrait(people[i].eyeColor, trait) ||
+                checkTrait(people[i].occupation, trait) ||
+                checkTrait(people[i].parents, trait) ||
+                checkTrait(people[i].currentSpouse, trait)
             ) {
-                searchResults.push(people[i]);
-                break;
+                traitMatchCount++;
             }
         }
+        if(traitMatchCount == searchTraits.length) {
+            searchResults.push(people[i]);
+            matchingOptions += `\n ${i+1}. ${people[i].firstName} ${people[i].lastName}`;
+        }
     }
-    return searchResults;
+
+    if(searchResults.length == 0) return 'No match found';
+    alert(`Found ${searchResults.length} matching people:${matchingOptions}`);
+    let chosenOption = promptFor("Enter the number of the person you want to know more about, type 'restart' or 'quit'.",chars);
+    if(chosenOption == 'restart') return app(people);
+    if(chosenOption == 'quit') return;
+    let selectedPerson = searchResults[chosenOption-1];
+    return selectedPerson;
 }
+
+
+
